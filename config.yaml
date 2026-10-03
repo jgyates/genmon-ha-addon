@@ -1,0 +1,33 @@
+name: Genmon
+version: "0.1.8"
+slug: genmon
+description: Generator monitor (genmon) for Generac, Kohler and other generator controllers
+url: https://github.com/jgyates/genmon
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: application
+boot: auto
+hassio_api: true
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:engine
+panel_title: Genmon
+webui: "http://[HOST]:[PORT:8000]/"
+ports:
+  8000/tcp: 8000
+  9083/tcp: 9083
+ports_description:
+  8000/tcp: Genmon web UI (direct access)
+  9083/tcp: genhalink API for the Genmon Home Assistant integration
+uart: true
+usb: true
+watchdog: "tcp://[HOST]:[PORT:8000]"
+options: {}
+schema:
+  serial_port: "device(subsystem=tty)?"
+  use_serial_tcp: "bool?"
+  serial_tcp_address: "str?"
+  serial_tcp_port: "port?"
+  modbus_tcp: "bool?"
