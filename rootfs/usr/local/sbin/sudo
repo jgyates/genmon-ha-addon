@@ -1,0 +1,9 @@
+#!/bin/sh
+# Container already runs as root: drop sudo flags and run the command (env handles VAR=value prefixes).
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -*) shift ;;
+        *) break ;;
+    esac
+done
+exec env "$@"

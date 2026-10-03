@@ -1,0 +1,3 @@
+#!/usr/bin/with-contenv bashio
+bashio::log.warning "Shutdown requested from the genmon web UI - stopping the app instead of the host"
+bashio::addon.stop

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genmon</title>
+<style>
+  :root {
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+    --bg-0: #090e1a; --bg-1: #111a2e; --bg-3: #253554;
+    --text-0: #e4eaf4; --text-1: #b0bdd0; --text-2: #7e8fa8;
+    --border: rgba(55,75,110,.45);
+    --accent: #4f8ffa; --accent-bg: rgba(79,143,250,.10);
+    --danger: #f05252; --warning: #f0b429; --success: #34d570;
+    --gradient-card: linear-gradient(168deg, rgba(20,30,52,.97) 0%, rgba(13,19,34,.99) 100%);
+    --shadow-lg: 0 8px 28px rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.35);
+    --input-bg: #080c18;
+    --radius: 8px; --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg-0: #f1f5f9; --bg-1: #ffffff; --bg-3: #e2e8f0;
+      --text-0: #0f172a; --text-1: #334155; --text-2: #64748b;
+      --border: #e2e8f0;
+      --accent: #3b82f6; --accent-bg: rgba(59,130,246,.08);
+      --gradient-card: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+      --shadow-lg: 0 8px 25px rgba(0,0,0,.08), 0 3px 10px rgba(0,0,0,.05);
+      --input-bg: #f8fafc;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg-0); color: var(--text-0); font-family: var(--font); font-size: 14px; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 32px 16px; }
+  .logo { display: block; height: 32px; width: auto; margin: 0 auto 20px; color: var(--text-0); }
+  .card { background: var(--gradient-card); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 20px 24px; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  h1 { font-size: 1.25rem; font-weight: 600; margin: 0; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: .8rem; font-weight: 600; background: var(--accent-bg); color: var(--accent); white-space: nowrap; }
+  .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .badge.starting .dot { animation: pulse 1.2s ease-in-out infinite; }
+  .badge.error { background: rgba(240,82,82,.12); color: var(--danger); }
+  @keyframes pulse { 50% { opacity: .25; } }
+  p { color: var(--text-1); line-height: 1.5; margin: 8px 0; }
+  .progress { height: 8px; background: var(--bg-3); border-radius: 999px; overflow: hidden; margin: 16px 0 6px; }
+  .progress > div { height: 100%; width: 0; background: var(--accent); border-radius: 999px; transition: width 1s linear; }
+  .eta { display: flex; justify-content: space-between; color: var(--text-2); font-size: .85rem; }
+  ul.steps { list-style: none; padding: 0; margin: 16px 0 0; }
+  ul.steps li { display: flex; align-items: center; gap: 10px; padding: 6px 0; color: var(--text-2); }
+  ul.steps li .ic { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--bg-3); flex: none; }
+  ul.steps li.active { color: var(--text-0); }
+  ul.steps li.active .ic { border-color: var(--accent); border-top-color: transparent; animation: spin 1s linear infinite; }
+  ul.steps li.done { color: var(--text-1); }
+  ul.steps li.done .ic { border-color: var(--success); background: var(--success); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .note { border-left: 3px solid var(--warning); background: rgba(240,180,41,.08); padding: 10px 12px; border-radius: var(--radius); color: var(--text-1); margin-top: 16px; }
+  .note.error { border-left-color: var(--danger); background: rgba(240,82,82,.08); }
+  pre { background: var(--input-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; font-family: var(--mono); font-size: .78rem; color: var(--text-1); white-space: pre-wrap; word-break: break-word; max-height: 240px; overflow: auto; }
+  h2 { font-size: .95rem; margin: 18px 0 6px; }
+  ol { color: var(--text-1); padding-left: 20px; line-height: 1.5; }
+  code { font-family: var(--mono); background: var(--input-bg); border: 1px solid var(--border); padding: 0 4px; border-radius: 4px; font-size: .85em; }
+  .hidden { display: none !important; }
+  .foot { color: var(--text-2); font-size: .8rem; text-align: center; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2919 660" width="142" height="32" role="img" aria-label="Genmon">
+    <path fill="#4CAF50" fill-rule="nonzero" d="M508 267l0 271c-37,19 -74,33 -109,43 -36,9 -70,14 -104,14 -84,0 -155,-28 -211,-84 -56,-56 -84,-127 -84,-212 0,-87 28,-158 85,-214 57,-57 129,-85 216,-85 33,0 64,4 94,14 30,8 58,22 86,40l-15 140c-26,-26 -51,-45 -77,-58 -26,-12 -53,-18 -81,-18 -50,0 -91,17 -124,50 -33,34 -49,76 -49,126 0,53 16,96 47,129 32,34 73,51 123,51 11,0 23,-2 35,-3 12,-3 24,-5 37,-9l0 -81 -106 0 0 -114 237 0z"/>
+    <path fill="currentColor" fill-rule="nonzero" d="M695 371l151 -4 0 -6c0,-18 -7,-33 -20,-45 -12,-11 -29,-17 -48,-17 -22,0 -40,6 -55,19 -14,12 -23,30 -28,53zm230 82l-13 107c-24,11 -47,19 -70,25 -23,5 -46,8 -69,8 -58,0 -104,-17 -140,-50 -35,-33 -53,-77 -53,-130 0,-56 19,-103 58,-141 39,-39 86,-58 141,-58 48,0 87,14 117,42 30,29 46,65 46,110 0,6 -1,17 -2,33l0 2 -11 16 -236 6c2,23 11,43 29,57 18,15 40,22 67,22 19,0 40,-4 63,-12 23,-9 48,-21 73,-37z"/>
+    <path fill="currentColor" fill-rule="nonzero" d="M1132 577l-121 0 0 -347 111 0 0 58c19,-23 38,-40 59,-51 21,-11 44,-16 68,-16 37,0 64,10 83,31 19,21 29,52 29,92l0 233 -120 0 0 -199c0,-18 -4,-32 -11,-41 -7,-9 -18,-14 -33,-14 -21,0 -37,7 -48,21 -12,14 -17,35 -17,62l0 171z"/>
+    <path fill="currentColor" fill-rule="nonzero" d="M1798 577l-121 0 0 -199c0,-18 -4,-31 -11,-41 -8,-9 -19,-14 -32,-14 -20,0 -36,7 -47,22 -11,14 -16,34 -16,61l0 171 -121 0 0 -347 112 0 0 58c20,-23 40,-41 60,-51 19,-11 41,-16 64,-16 25,0 46,5 63,15 16,11 30,28 42,51 17,-22 35,-39 55,-50 20,-11 42,-16 66,-16 38,0 67,10 85,32 18,22 27,55 27,101l0 223 -120 0 0 -199c0,-18 -4,-31 -11,-41 -8,-9 -19,-14 -32,-14 -21,0 -36,7 -47,22 -11,14 -16,34 -16,61l0 171z"/>
+    <path fill="currentColor" fill-rule="nonzero" d="M2689 577l-120 0 0 -347 111 0 0 58c19,-23 38,-40 59,-51 21,-11 43,-16 68,-16 36,0 64,10 83,31 19,21 29,52 29,92l0 233 -120 0 0 -199c0,-18 -4,-32 -11,-41 -8,-9 -19,-14 -33,-14 -21,0 -37,7 -49,21 -11,14 -17,35 -17,62l0 171z"/>
+    <path fill="currentColor" stroke="currentColor" stroke-width="57.1" d="M2144 322c12,-21 28,-37 46,-50 41,-30 94,-39 143,-25 54,17 96,61 110,114 8,30 8,60 -1,90 -7,24 -20,46 -37,64 -7,8 -15,15 -24,21 -17,13 -33,20 -53,25 -88,24 -176,-28 -200,-115 -11,-41 -6,-86 16,-124zm224 -72c-56,-33 -127,-26 -181,9 -61,40 -89,119 -70,190 5,20 13,36 24,54 11,16 31,37 53,49l-37 64 10 5 36 -63c57,32 128,25 182,-10 60,-40 89,-119 70,-190 -6,-19 -13,-35 -25,-53 -11,-17 -30,-37 -52,-50l37 -63 -10 -6 -37 64z"/>
+    <path fill="currentColor" stroke="currentColor" stroke-width="34.26" d="M2179 403c4,0 8,1 11,3 4,-16 23,-53 44,-53 30,0 65,113 101,113 18,0 29,-10 39,-23 7,-9 16,-25 19,-38 -4,-1 -8,-2 -11,-4 -2,9 -11,27 -16,33 -33,45 -52,5 -78,-37 -9,-17 -31,-55 -52,-55 -31,0 -52,38 -57,61z"/>
+  </svg>
+
+  <div class="card">
+    <div class="head">
+      <h1 id="title">Genmon is starting</h1>
+      <span id="badge" class="badge starting"><span class="dot"></span><span id="badge-text">Starting</span></span>
+    </div>
+
+    <div id="starting">
+      <p id="lead">Genmon usually needs about 30-45 seconds to start. This page switches to the genmon web interface automatically.</p>
+      <div class="progress"><div id="bar"></div></div>
+      <div class="eta"><span id="elapsed"></span><span id="remaining"></span></div>
+      <ul class="steps">
+        <li id="step-genmon"><span class="ic"></span>Starting genmon and connecting to the controller</li>
+        <li id="step-web"><span class="ic"></span>Starting the web interface</li>
+      </ul>
+      <div id="slow" class="note hidden">This is taking longer than usual. If it does not finish soon, check the app <b>Log</b> tab.</div>
+    </div>
+
+    <div id="error" class="hidden">
+      <p id="error-message">Genmon stopped unexpectedly.</p>
+      <p id="retry"></p>
+      <div id="log-wrap" class="hidden">
+        <h2>Last lines of genmon.log</h2>
+        <pre id="log"></pre>
+      </div>
+      <h2>Things to check</h2>
+      <ol>
+        <li>The app <b>Log</b> tab lists the configured serial port and the serial devices that are available.</li>
+        <li>In the app <b>Configuration</b> tab set <b>Serial port</b>, or enable <b>Use serial over TCP</b> and enter the converter address.</li>
+        <li>Raspberry Pi 5 GPIO pins 14/15 need <code>dtparam=uart0=on</code> in <code>config.txt</code> on the HAOS boot partition, then <code>/dev/ttyAMA0</code>.</li>
+        <li>Restart the app after changing the configuration.</li>
+      </ol>
+    </div>
+
+    <div id="note" class="note hidden"></div>
+  </div>
+  <div class="foot">Genmon Home Assistant app</div>
+</div>
+
+<script>
+(function () {
+  var base = '__INGRESS_PATH__';
+  if (base.indexOf('__') === 0) base = '';
+  var EXPECTED = 45;
+  var SLOW = 90;
+  var status = null;
+  var clockOffset = 0;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function now() { return (Date.now() + clockOffset) / 1000; }
+
+  function show(id, on) { $(id).classList.toggle('hidden', !on); }
+
+  function setStep(id, state) {
+    var el = $(id);
+    el.classList.remove('active', 'done');
+    if (state) el.classList.add(state);
+  }
+
+  function render() {
+    var state = status ? status.state : 'starting';
+    var isError = state === 'error';
+    show('starting', !isError);
+    show('error', isError);
+
+    var note = status && status.message;
+    show('note', !!note && !isError);
+    $('note').textContent = note || '';
+
+    var badge = $('badge');
+    badge.className = 'badge ' + (isError ? 'error' : 'starting');
+
+    if (isError) {
+      $('title').textContent = 'Genmon is not running';
+      $('badge-text').textContent = 'Stopped';
+      $('error-message').textContent = (status.message || 'Genmon stopped unexpectedly.') + ' The app restarts it automatically.';
+      var wait = status.next_retry ? Math.max(0, Math.round(status.next_retry - now())) : null;
+      $('retry').textContent = wait === null ? '' : (wait > 0 ? 'Next attempt in ' + wait + ' s.' : 'Retrying now...');
+      var lines = status.log || [];
+      show('log-wrap', lines.length > 0);
+      $('log').textContent = lines.join('\n');
+      return;
+    }
+
+    $('title').textContent = 'Genmon is starting';
+    $('badge-text').textContent = 'Starting';
+    var started = status && status.started ? status.started : now();
+    var elapsed = Math.max(0, now() - started);
+    var remaining = Math.max(0, Math.round(EXPECTED - elapsed));
+    $('bar').style.width = Math.min(100, (elapsed / EXPECTED) * 100) + '%';
+    $('elapsed').textContent = Math.round(elapsed) + ' s elapsed';
+    $('remaining').textContent = remaining > 0 ? 'about ' + remaining + ' s remaining' : 'almost there...';
+    show('slow', elapsed > SLOW);
+
+    if (state === 'running') {
+      setStep('step-genmon', 'done');
+      setStep('step-web', 'active');
+    } else {
+      setStep('step-genmon', 'active');
+      setStep('step-web', null);
+    }
+  }
+
+  function poll() {
+    fetch(base + '/genmon_ha_status.json', { cache: 'no-store' })
+      .then(function (r) {
+        var d = r.headers.get('Date');
+        if (d) clockOffset = Date.parse(d) - Date.now();
+        return r.ok ? r.json() : null;
+      })
+      .then(function (s) {
+        status = s;
+        render();
+        // Only probe the web UI once genmon is up, to keep the app log quiet
+        if (s && s.state === 'running') {
+          return fetch(base + '/', { cache: 'no-store' }).then(function (r) {
+            if (r.ok) location.reload();
+          });
+        }
+      })
+      .catch(function () {});
+  }
+
+  render();
+  poll();
+  setInterval(render, 1000);
+  setInterval(poll, 3000);
+})();
+</script>
+</body>
+</html>

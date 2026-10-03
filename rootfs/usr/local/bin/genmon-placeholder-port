@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+# Usage: genmon-placeholder-port <path>
+# Creates a serial device at <path> that never answers, so genmon (and its web UI)
+# can start before the real port is configured.
+import os
+import pty
+import sys
+import time
+
+link = sys.argv[1]
+master, slave = pty.openpty()
+# Keep the slave open so reads on master don't fail while genmon has the port closed
+target = os.ttyname(slave)
+
+if os.path.islink(link):
+    os.remove(link)
+os.makedirs(os.path.dirname(link), exist_ok=True)
+os.symlink(target, link)
+
+while True:
+    try:
+        os.read(master, 4096)
+    except OSError:
+        time.sleep(1)

@@ -1,0 +1,22 @@
+configuration:
+  serial_port:
+    name: Serial port
+    description: >-
+      Serial device connected to the generator controller (e.g. a USB-RS485
+      adapter or /dev/ttyAMA0). Leave empty to keep the value set in the
+      genmon web UI.
+  use_serial_tcp:
+    name: Use serial over TCP
+    description: Connect through a serial-to-TCP converter instead of a local serial port.
+  serial_tcp_address:
+    name: Serial TCP address
+    description: IP address of the serial-to-TCP converter.
+  serial_tcp_port:
+    name: Serial TCP port
+    description: TCP port of the serial-to-TCP converter (typically 8899, or 502 for Modbus TCP).
+  modbus_tcp:
+    name: Modbus TCP
+    description: Use the Modbus TCP protocol instead of serial passthrough over TCP.
+network:
+  8000/tcp: Genmon web UI (direct access)
+  9083/tcp: genhalink API for the Genmon Home Assistant integration

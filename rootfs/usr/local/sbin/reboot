@@ -1,0 +1,3 @@
+#!/usr/bin/with-contenv bashio
+bashio::log.warning "Reboot requested from the genmon web UI - restarting the app instead of the host"
+bashio::addon.restart
