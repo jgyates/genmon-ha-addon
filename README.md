@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="Genmon" width="160">
+  <img src="genmon-ha-addon/logo.png" alt="Genmon" width="160">
 </p>
 
 # Genmon – Home Assistant App
@@ -52,13 +52,13 @@ Run [genmon](https://github.com/jgyates/genmon), the open-source generator monit
 
 ### Option A – Add the repository (recommended)
 
-[![Add repository to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fjgyates%2Fgenmon)
+[![Add repository to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fjgyates%2Fgenmon-ha-addon)
 
 Or manually:
 
 1. In Home Assistant open **Settings → Apps → App store** (older versions: **Settings → Add-ons → Add-on store**).
 2. Click the **⋮** menu (top right) → **Repositories**.
-3. Add `https://github.com/jgyates/genmon` and click **Add**, then **Close**.
+3. Add `https://github.com/jgyates/genmon-ha-addon` and click **Add**, then **Close**.
 4. Refresh the page. **Genmon** appears in the store.
 5. Open **Genmon** and click **Install**.
 
@@ -205,7 +205,7 @@ Not supported inside the app: Bluetooth tank sensors (Mopeka), GPIO-based genmon
 ## Updating
 
 - **App update:** when a new app version is available, Home Assistant shows an update on the app page. The image is rebuilt with the genmon version defined by the app. Your settings in `/data` are kept.
-- **Choosing the genmon version:** the genmon source and branch/tag are set in [`build.yaml`](build.yaml) (`GENMON_REPO`, `GENMON_REF`). After changing them, bump `version` in [`config.yaml`](config.yaml) so Home Assistant offers the rebuild.
+- **Choosing the genmon version:** the genmon source and branch/tag are set in [`build.yaml`](genmon-ha-addon/build.yaml) (`GENMON_REPO`, `GENMON_REF`). After changing them, bump `version` in [`config.yaml`](genmon-ha-addon/config.yaml) so Home Assistant offers the rebuild.
 
 ## Troubleshooting
 
