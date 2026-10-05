@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.9
+
+- Rebuild to pick up the latest genmon from `master`.
+- Add a short README for the app Info tab.
+
 ## 0.1.8
 
 - Expose port 9083 (genhalink) so the Genmon Home Assistant integration can connect.
