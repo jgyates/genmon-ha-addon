@@ -160,7 +160,7 @@ This app runs genmon itself. To get generator sensors, binary sensors, buttons a
 ### Native integration (genhalink) – recommended
 
 1. In genmon open **Settings** and enable **Home Assistant Integration (Native)**. Copy the generated **API key**. Save.
-2. Install the **Genmon Generator Monitor** integration through **HACS** (see [`custom_components/genmon`](../custom_components/genmon/README.md)).
+2. Install the **Genmon Generator Monitor** integration through **HACS** (see [`custom_components/genmon`](https://github.com/jgyates/genmon-ha)).
 3. In Home Assistant go to **Settings → Devices & Services → Add Integration → Genmon** and enter:
    - **Host:** the IP address of your Home Assistant machine
    - **Port:** `9083`

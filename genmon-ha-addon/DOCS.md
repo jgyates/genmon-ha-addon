@@ -17,7 +17,7 @@ Choose one of these:
 2. **Raspberry Pi GPIO UART (pins 14/15):** edit `config.txt` on the HAOS boot partition (put the SD card/SSD in a PC, or use an SSH app with protection mode off: `/mnt/boot/config.txt`), reboot, then select the device under **Serial port**:
    - Pi 5: add `dtparam=uart0=on` and use `/dev/ttyAMA0`. (`/dev/ttyAMA10` is the separate debug connector, not the GPIO pins.)
    - Pi 3/4: add `enable_uart=1` and `dtoverlay=disable-bt` and use `/dev/ttyAMA0`.
-3. **Serial over TCP / Modbus TCP:** enable **Use serial over TCP** and enter the converter's address and port. No local device is needed.
+3. **Serial over TCP / Modbus TCP:** enable **Use serial over TCP** and enter the converter's address and port. Also enable **Modbus TCP** if the converter speaks Modbus TCP (port usually `502`) rather than plain serial passthrough. No local device is needed.
 
 App options are written to `genmon.conf` only when they are set. Leave them empty to manage these settings from the genmon web UI.
 

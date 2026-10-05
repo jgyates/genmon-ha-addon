@@ -2,7 +2,7 @@ name: Genmon
 version: "0.1.8"
 slug: genmon
 description: Generator monitor (genmon) for Generac, Kohler and other generator controllers
-url: https://github.com/jgyates/genmon
+url: https://github.com/jgyates/genmon-ha-addon
 arch:
   - aarch64
   - amd64
