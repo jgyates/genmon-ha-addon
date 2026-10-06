@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.10
+
+- Move build settings from the deprecated `build.yaml` into the Dockerfile (removes the Supervisor "uses build.yaml which is deprecated" warning).
+
 ## 0.1.9
 
 - Rebuild to pick up the latest genmon from `master`.

@@ -1,8 +1,7 @@
-ARG BUILD_FROM
-FROM ${BUILD_FROM}
+FROM ghcr.io/home-assistant/base-debian:bookworm
 
-ARG GENMON_REPO
-ARG GENMON_REF
+ARG GENMON_REPO="https://github.com/jgyates/genmon.git"
+ARG GENMON_REF="master"
 
 # cmake must be present or genloader tries to apt-get it on every start
 RUN apt-get update \

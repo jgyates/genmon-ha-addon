@@ -205,7 +205,7 @@ Not supported inside the app: Bluetooth tank sensors (Mopeka), GPIO-based genmon
 ## Updating
 
 - **App update:** when a new app version is available, Home Assistant shows an update on the app page. The image is rebuilt with the genmon version defined by the app. Your settings in `/data` are kept.
-- **Choosing the genmon version:** the genmon source and branch/tag are set in [`build.yaml`](genmon-ha-addon/build.yaml) (`GENMON_REPO`, `GENMON_REF`). After changing them, bump `version` in [`config.yaml`](genmon-ha-addon/config.yaml) so Home Assistant offers the rebuild.
+- **Choosing the genmon version:** the genmon source and branch/tag are set by the `GENMON_REPO` and `GENMON_REF` defaults in the [`Dockerfile`](genmon-ha-addon/Dockerfile). After changing them, bump `version` in [`config.yaml`](genmon-ha-addon/config.yaml) so Home Assistant offers the rebuild.
 
 ## Troubleshooting
 
