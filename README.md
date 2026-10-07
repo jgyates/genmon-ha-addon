@@ -98,18 +98,53 @@ Pick one method. After changing it, genmon restarts and the communication errors
 
 ### 2. Raspberry Pi GPIO serial port (pins 14/15)
 
-The GPIO serial port is disabled on Home Assistant OS by default and must be enabled once in the boot configuration. This is the only step that cannot be done from the Home Assistant UI.
+The GPIO serial port is disabled on Home Assistant OS by default and must be enabled once in `config.txt` on the boot partition. This is the only step that cannot be done from the Home Assistant UI. The change survives Home Assistant OS updates.
+
+| Raspberry Pi | Add to `config.txt` | Port to use |
+|---|---|---|
+| Pi 5 | `dtparam=uart0=on` | `/dev/ttyAMA0` |
+| Pi 4 / Pi 3 | `enable_uart=1` and `dtoverlay=disable-bt` | `/dev/ttyAMA0` |
+
+Add the lines at the very end of the file, below the last `[all]`. Use **one** of these two ways:
+
+**Option A – on a computer (SD card / SSD removed)**
 
 1. Shut down Home Assistant, remove the SD card / SSD and connect it to a computer.
-2. Open the small boot partition (named `hassos-boot`) and edit `config.txt`. Add at the end:
-
-   | Raspberry Pi | Add to `config.txt` | Port to use |
-   |---|---|---|
-   | Pi 5 | `dtparam=uart0=on` | `/dev/ttyAMA0` |
-   | Pi 4 / Pi 3 | `enable_uart=1` and `dtoverlay=disable-bt` | `/dev/ttyAMA0` |
-
+2. Open the small boot partition (named `hassos-boot`, about 64 MB) and edit `config.txt` as shown in the table.
 3. Put the card back and boot.
-4. In genmon **Settings** (or the app **Configuration** tab) set **Serial port** to `/dev/ttyAMA0`.
+
+> **Pi 5 disk on Windows shows no drive?** On a Pi 5, Home Assistant OS marks the boot partition as an "EFI System Partition", and Windows does not give those a drive letter. Pi 3/4 disks show up normally. To edit it anyway:
+>
+> 1. Open **Command Prompt as administrator** and run `diskpart`.
+> 2. `list disk` → find the SD card / SSD, then `select disk N` (N = its number).
+> 3. `list partition` → `select partition 1` (the small one) → `assign letter=Z` → `exit`.
+> 4. Open **Notepad as administrator** (Explorer may say "access denied" here, that is normal), open `Z:\config.txt`, add the line and save.
+> 5. Run `diskpart` again: `select disk N` → `select partition 1` → `remove letter=Z` → `exit`. Eject the disk safely.
+
+**Option B – on the Pi itself, over SSH (no need to remove the disk)**
+
+The boot partition is not visible inside SSH apps, not even with protection mode off. Samba doesn't show it either. The command below starts a short-lived helper container that can reach it.
+
+1. Install the **Advanced SSH & Web Terminal** app and turn **Protection mode** off on its **Info** tab.
+2. Open its terminal and run the command for your Pi. It adds the lines only if they are missing and then shows the end of the file:
+
+   **Pi 5**
+
+   ```sh
+   docker run --rm -v /mnt/boot:/boot alpine sh -c 'grep -qx "dtparam=uart0=on" /boot/config.txt || echo "dtparam=uart0=on" >> /boot/config.txt; tail -n 3 /boot/config.txt'
+   ```
+
+   **Pi 4 / Pi 3**
+
+   ```sh
+   docker run --rm -v /mnt/boot:/boot alpine sh -c 'for l in enable_uart=1 dtoverlay=disable-bt; do grep -qx "$l" /boot/config.txt || echo "$l" >> /boot/config.txt; done; tail -n 4 /boot/config.txt'
+   ```
+
+   The first run downloads the small `alpine` image ("Unable to find image … locally" is expected). The output should end with the added line(s).
+3. Reboot the host: `ha host reboot`.
+4. Turn **Protection mode** back on. Optionally remove the helper image with `docker rmi alpine`.
+
+**Then, for both options:** in genmon **Settings** (or the app **Configuration** tab) set **Serial port** to `/dev/ttyAMA0`. The app log lists the serial devices it can see; `/dev/ttyAMA0` should be among them.
 
 > On a Pi 5, `/dev/ttyAMA10` is the small 3-pin debug connector next to the HDMI ports, **not** GPIO 14/15.
 >
@@ -177,6 +212,7 @@ Enable the genmon **MQTT** add-on in genmon and point it at your MQTT broker (fo
 | What | Location inside the app | Notes |
 |---|---|---|
 | Genmon settings | `/data/genmon/` | All `*.conf` files. Missing files are added from the defaults on every start; existing files are never overwritten. |
+| Genmon history | `/data/genmon/` | Outage log (`outage.txt`), service journal (`maintlog.json`), kW and fuel logs, sensor history. Genmon looks for them in `/etc/genmon/`, which the app links to this folder. |
 | Genmon logs | `/data/log/` | `genmon.log`, `genserv.log`, `genloader.log` are also shown on the app **Log** tab. |
 
 - Both locations are included in Home Assistant backups (full backups, or partial backups that include the Genmon app).
@@ -216,7 +252,7 @@ Start with the app **Log** tab – it shows the configured connection, available
 | Sidebar shows "Genmon is starting" for a long time | Normal first start takes 30–45 s. If it stays there, check the **Log** tab. |
 | Sidebar shows "Genmon is not running" | Genmon stopped. The page shows the last genmon log lines. The app retries automatically. |
 | Log: `Serial port '/dev/serial0' does not exist` | No real port configured yet. Set the port as described in [Connecting to the generator](#connecting-to-the-generator). |
-| Log: `Available serial devices: /dev/ttyAMA10` only (Pi 5) | GPIO UART not enabled. Add `dtparam=uart0=on` to `config.txt`. |
+| Log: `Available serial devices: /dev/ttyAMA10` only (Pi 5) | GPIO UART not enabled. Add `dtparam=uart0=on` to `config.txt`, see [Raspberry Pi GPIO serial port](#2-raspberry-pi-gpio-serial-port-pins-1415). |
 | Genmon runs but shows communication errors | Wrong port, wiring (A/B or TX/RX swapped), or the controller is off. See the [genmon serial troubleshooting guide](https://github.com/jgyates/genmon/wiki/3.6---Serial-Troubleshooting). |
 | `genloader.log` shows `PID still exists but it's a zombie` | Harmless message from genmon's loader when a module exits; it also appears on normal installs. |
 | Direct port 8000 doesn't load | Check the port is not disabled under **Network** on the **Configuration** tab, and that genmon is running. |

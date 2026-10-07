@@ -14,9 +14,11 @@ Genmon's HTTPS option is turned off on every start because ingress only works ov
 Choose one of these:
 
 1. **USB-RS485 adapter (easiest):** plug it in, then select it under **Serial port** in the app configuration.
-2. **Raspberry Pi GPIO UART (pins 14/15):** edit `config.txt` on the HAOS boot partition (put the SD card/SSD in a PC, or use an SSH app with protection mode off: `/mnt/boot/config.txt`), reboot, then select the device under **Serial port**:
+2. **Raspberry Pi GPIO UART (pins 14/15):** add one line (Pi 5) or two lines (Pi 3/4) at the end of `config.txt` on the HAOS boot partition, reboot, then select the device under **Serial port**:
    - Pi 5: add `dtparam=uart0=on` and use `/dev/ttyAMA0`. (`/dev/ttyAMA10` is the separate debug connector, not the GPIO pins.)
    - Pi 3/4: add `enable_uart=1` and `dtoverlay=disable-bt` and use `/dev/ttyAMA0`.
+
+   Edit the file either on a computer (SD card/SSD removed; on Windows a Pi 5 disk needs a drive letter assigned with `diskpart` first), or on the Pi with the Advanced SSH & Web Terminal app (protection mode off) and a one-line `docker run` command. SSH apps cannot see the boot partition directly. Step-by-step instructions and the commands for each Pi model: [README – Raspberry Pi GPIO serial port](https://github.com/jgyates/genmon-ha-addon#2-raspberry-pi-gpio-serial-port-pins-1415).
 3. **Serial over TCP / Modbus TCP:** enable **Use serial over TCP** and enter the converter's address and port. Also enable **Modbus TCP** if the converter speaks Modbus TCP (port usually `502`) rather than plain serial passthrough. No local device is needed.
 
 App options are written to `genmon.conf` only when they are set. Leave them empty to manage these settings from the genmon web UI.
@@ -25,7 +27,7 @@ If the configured serial port does not exist, the app sets the genmon serial por
 
 ## Files
 
-- Configuration: `/data/genmon/` (kept across restarts and updates, included in HA backups)
+- Configuration and history (outage log, service journal, kW/fuel logs): `/data/genmon/` (kept across restarts and updates, included in HA backups and genmon's Export/Import Configuration)
 - Logs: `/data/log/` (genmon, genserv and genloader logs are also shown in the app log)
 
 ## Differences from a normal genmon install

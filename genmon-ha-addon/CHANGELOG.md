@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.11
+
+- Keep the outage log, service journal, kW and fuel logs and sensor history in `/data/genmon/`. Genmon wrote them to a folder inside the container, so they were lost on restart, missing from exports, and not shown after **Import Configuration**. A previous import now shows up without importing again.
+- Docs: correct how to edit `config.txt` for the GPIO serial port. SSH apps can't see `/mnt/boot`; use the `docker run` command, which differs for the Pi 5 and the Pi 3/4. On Windows, a Pi 5 disk needs a drive letter assigned with `diskpart`.
+
 ## 0.1.10
 
 - Move build settings from the deprecated `build.yaml` into the Dockerfile (removes the Supervisor "uses build.yaml which is deprecated" warning).

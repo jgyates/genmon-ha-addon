@@ -18,6 +18,16 @@ stop_genmon() {
 
 mkdir -p "${CONF_DIR}" "${LOG_DIR}"
 
+# genmon ignores -c for its outage log, service journal, kW/fuel logs and sensor data and
+# always uses /etc/genmon/, so point that path at the persistent config folder
+if [ ! -L /etc/genmon ]; then
+    if [ -d /etc/genmon ]; then
+        cp -an /etc/genmon/. "${CONF_DIR}" 2>/dev/null
+        rm -rf /etc/genmon
+    fi
+    ln -s "${CONF_DIR%/}" /etc/genmon || bashio::log.warning "Could not link /etc/genmon to ${CONF_DIR}"
+fi
+
 # Seed missing config files only; existing user settings are kept
 for f in /genmon/conf/*.conf; do
     if [ ! -f "${CONF_DIR}$(basename "${f}")" ]; then
