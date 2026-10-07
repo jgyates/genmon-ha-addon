@@ -45,7 +45,7 @@ Run [genmon](https://github.com/jgyates/genmon), the open-source generator monit
 |---|---|
 | Home Assistant | Home Assistant OS or Supervised (apps are not available on Container/Core installs) |
 | Hardware | 64-bit ARM (Raspberry Pi 3/4/5, `aarch64`) or 64-bit x86 (`amd64`, e.g. mini PC, NUC, VM) |
-| Connection to the generator | One of: USB-RS485 adapter, Raspberry Pi GPIO serial port (UART), or a serial-to-network converter |
+| Connection to the generator |  Connects through a serial port. Typically a RS-232 serial port but could be RS-485 or serial over TCP depending on your generator. See [genmon Wiki] (https://github.com/jgyates/genmon/wiki) for more details. |
 | Disk space | About 1 GB for the image (it is built on your machine during installation) |
 
 ## Installation

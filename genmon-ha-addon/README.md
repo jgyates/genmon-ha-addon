@@ -13,7 +13,7 @@ Run [genmon](https://github.com/jgyates/genmon), the open-source generator monit
 
 - Complete genmon (monitor, web interface and genmon add-ons) in a Home Assistant app.
 - **Genmon** sidebar panel, plus direct access on port **8000**.
-- Connects through a USB-RS485 adapter, the Raspberry Pi GPIO UART, or a serial-over-TCP / Modbus TCP converter.
+- Connects through a serial port. Typically a RS-232 serial port but could be RS-485 or serial over TCP depending on your generator. See [genmon Wiki] (https://github.com/jgyates/genmon/wiki) for more details.
 - Port **9083** for the [Genmon Home Assistant integration](https://github.com/jgyates/genmon-ha) (sensors and buttons).
 - Settings and logs survive restarts and updates, and they are included in Home Assistant backups.
 - Starts without a serial port configured, so you can finish the setup in the genmon web interface.
