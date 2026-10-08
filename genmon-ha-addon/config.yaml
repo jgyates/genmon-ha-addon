@@ -1,5 +1,5 @@
 name: Genmon
-version: "0.1.12"
+version: "0.1.13"
 slug: genmon
 description: Generator monitor (genmon) for Generac, Kohler and other generator controllers
 url: https://github.com/jgyates/genmon-ha-addon

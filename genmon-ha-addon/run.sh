@@ -18,6 +18,10 @@ stop_genmon() {
 
 mkdir -p "${CONF_DIR}" "${LOG_DIR}"
 
+if [ -f /usr/share/genmon-ha/genmon-version ]; then
+    bashio::log.info "genmon $(cat /usr/share/genmon-ha/genmon-version)"
+fi
+
 # genmon ignores -c for its outage log, service journal, kW/fuel logs and sensor data and
 # always uses /etc/genmon/, so point that path at the persistent config folder
 if [ ! -L /etc/genmon ]; then
