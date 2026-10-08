@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.13
+
+- Every app update now downloads the latest genmon. Before, Docker could reuse a cached download, so an app update could keep an older genmon (genmon issue #1556).
+- **Rebuild** on the app page (⋮ menu) now gets the latest genmon without waiting for a new app version. Settings and logs in `/data` are kept.
+- The app log shows the genmon version and commit at startup.
+- Docs: genmon's **About → Update** does nothing in the app. How to get a genmon fix instead.
+
 ## 0.1.12
 
 - Rebuild to pick up the latest genmon from `master`.

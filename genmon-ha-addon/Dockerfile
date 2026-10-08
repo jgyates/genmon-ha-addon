@@ -20,9 +20,20 @@ RUN apt-get update \
     && rm -f /usr/lib/python3*/EXTERNALLY-MANAGED \
     && rm -rf /var/lib/apt/lists/*
 
-# No .git: the web UI "Update" then fails harmlessly instead of changing a copy lost on restart
-RUN git clone --depth 1 --branch "${GENMON_REF}" "${GENMON_REPO}" /genmon \
-    && rm -rf /genmon/.git
+# Docker reuses cached layers, which would keep an old genmon. The ref list changes whenever the
+# genmon repo moves, so "Rebuild" fetches new commits; BUILD_VERSION (set by Supervisor) makes every
+# app version download genmon again. Placed after apt so that layer stays cached.
+ADD ${GENMON_REPO}/info/refs?service=git-upload-pack /tmp/genmon-refs
+ARG BUILD_VERSION
+
+# No .git: the web UI "Update" then fails harmlessly instead of changing a copy lost on restart.
+# genmon-version (version, commit, date) is logged at startup.
+RUN echo "App ${BUILD_VERSION}: downloading genmon ${GENMON_REF}" \
+    && git clone --depth 1 --branch "${GENMON_REF}" "${GENMON_REPO}" /genmon \
+    && mkdir -p /usr/share/genmon-ha \
+    && echo "$(sed -n -E 's/^[[:space:]]*GENMON_VERSION[[:space:]]*=[[:space:]]*"([^"]*)".*/\1/p' /genmon/genmonlib/program_defaults.py) ($(git -C /genmon log -1 --format='%h, %cs'))" \
+        > /usr/share/genmon-ha/genmon-version \
+    && rm -rf /genmon/.git /tmp/genmon-refs
 
 # Installed one by one so a Pi-only package that fails to build on amd64 doesn't break the image
 RUN grep -vE '^[[:space:]]*(#|$)' /genmon/requirements.txt | while read -r req; do \
