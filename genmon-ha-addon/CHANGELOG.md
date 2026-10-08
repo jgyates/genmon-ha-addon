@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.12
+
+- Rebuild to pick up the latest genmon from `master`.
+- Docs: new section on moving from an existing genmon install (Export/Import Configuration, then restart the app and set the serial port).
+- Docs: how to find the boot partition with `diskpart` (always partition 1), and a GPIO header tip for a Pi 5 with an M.2 HAT+.
+- Docs: SPI and I²C based genmon add-ons (CT sensor HAT, DIY fuel tank gauge) are not supported in the app. Also new FAQ entries for `raspi-config` and how genmon updates reach the app.
+
 ## 0.1.11
 
 - Keep the outage log, service journal, kW and fuel logs and sensor history in `/data/genmon/`. Genmon wrote them to a folder inside the container, so they were lost on restart, missing from exports, and not shown after **Import Configuration**. A previous import now shows up without importing again.

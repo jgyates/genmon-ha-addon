@@ -17,16 +17,17 @@ Run [genmon](https://github.com/jgyates/genmon), the open-source generator monit
 2. [Requirements](#requirements)
 3. [Installation](#installation)
 4. [First start](#first-start)
-5. [Connecting to the generator](#connecting-to-the-generator)
-6. [App configuration options](#app-configuration-options)
-7. [Using the web interface](#using-the-web-interface)
-8. [Home Assistant integration (sensors, buttons)](#home-assistant-integration-sensors-buttons)
-9. [Files, logs and backups](#files-logs-and-backups)
-10. [Differences from a normal genmon install](#differences-from-a-normal-genmon-install)
-11. [Updating](#updating)
-12. [Troubleshooting](#troubleshooting)
-13. [FAQ](#faq)
-14. [How it works](#how-it-works)
+5. [Moving from an existing genmon install](#moving-from-an-existing-genmon-install)
+6. [Connecting to the generator](#connecting-to-the-generator)
+7. [App configuration options](#app-configuration-options)
+8. [Using the web interface](#using-the-web-interface)
+9. [Home Assistant integration (sensors, buttons)](#home-assistant-integration-sensors-buttons)
+10. [Files, logs and backups](#files-logs-and-backups)
+11. [Differences from a normal genmon install](#differences-from-a-normal-genmon-install)
+12. [Updating](#updating)
+13. [Troubleshooting](#troubleshooting)
+14. [FAQ](#faq)
+15. [How it works](#how-it-works)
 
 ---
 
@@ -81,7 +82,23 @@ Or manually:
 
 - While genmon starts (about 30–45 seconds) the sidebar panel shows a status page with a progress bar and countdown. It switches to the genmon web interface automatically.
 - If genmon cannot start, the same page shows the reason, the last lines of the genmon log and when the next automatic retry happens.
-- On the very first start no serial port is configured. The app then points genmon at a placeholder port (`/run/genmon/no-serial-port`), so genmon and its web interface start and show communication errors. This is expected until you configure the real connection (next section).
+- On the very first start no serial port is configured. The app then points genmon at a placeholder port (`/run/genmon/no-serial-port`), so genmon and its web interface start and show communication errors. This is expected until you configure the real connection (see [Connecting to the generator](#connecting-to-the-generator)).
+
+## Moving from an existing genmon install
+
+If genmon already runs on another machine (for example a Raspberry Pi), you can move everything to the app with genmon's own export and import. You don't need to copy files by hand. The export contains all settings plus the outage log, service journal, kW and fuel logs and sensor history.
+
+1. On the **old** genmon open **About** → **Export Configuration**. This downloads `genmon_backup.tar.gz`.
+   No **Export Configuration** button on an older genmon? Update genmon there first, or run `sudo ~/genmon/genmonmaint.sh -b` over SSH. It creates the same `genmon_backup.tar.gz` in the genmon folder.
+2. In the **app**, open the genmon web interface → **About** → **Import Configuration** and select the file. Genmon restores it and restarts.
+3. Restart the app (**Info** tab → **Restart**). This re-applies the settings the app needs (see [Settings the app always sets](#settings-the-app-always-sets)) and your app **Configuration** options, and it checks the serial port again.
+4. Set the serial port for the new hardware as described in [Connecting to the generator](#connecting-to-the-generator). The import brings over the old machine's port (often `/dev/serial0`), which usually doesn't exist here. Until you set the right port, the app uses its placeholder port. Setting the port on the app's **Configuration** tab is the safest choice, because it's applied on every start.
+5. Open the **Outage** and **Service Journal** pages and check that your history is there.
+
+- Import accepts files up to 10 MB. Even years of logs normally fit, because the file is compressed.
+- App versions before 0.1.11 imported the settings but didn't show the history. After updating to 0.1.11 or later, the history shows up without importing again.
+- GPIO, SPI and I²C based genmon add-ons don't carry over (see [Differences from a normal genmon install](#differences-from-a-normal-genmon-install)).
+- Keep the old system as it is until the app is connected to the generator, so you have a fallback.
 
 ## Connecting to the generator
 
@@ -110,16 +127,18 @@ Add the lines at the very end of the file, below the last `[all]`. Use **one** o
 **Option A – on a computer (SD card / SSD removed)**
 
 1. Shut down Home Assistant, remove the SD card / SSD and connect it to a computer.
-2. Open the small boot partition (named `hassos-boot`, about 64 MB) and edit `config.txt` as shown in the table.
+2. Open the small boot partition (named `hassos-boot`, 32 MB on a Pi 3/4, 64 MB on a Pi 5) and edit `config.txt` as shown in the table.
 3. Put the card back and boot.
 
 > **Pi 5 disk on Windows shows no drive?** On a Pi 5, Home Assistant OS marks the boot partition as an "EFI System Partition", and Windows does not give those a drive letter. Pi 3/4 disks show up normally. To edit it anyway:
 >
 > 1. Open **Command Prompt as administrator** and run `diskpart`.
 > 2. `list disk` → find the SD card / SSD, then `select disk N` (N = its number).
-> 3. `list partition` → `select partition 1` (the small one) → `assign letter=Z` → `exit`.
+> 3. `list partition` → `select partition 1` → `assign letter=Z` → `exit`. A Home Assistant OS disk has 8 partitions, and several have similar sizes. The boot partition is always **partition 1**: the first one, 64 MB, shown as type `System`.
 > 4. Open **Notepad as administrator** (Explorer may say "access denied" here, that is normal), open `Z:\config.txt`, add the line and save.
 > 5. Run `diskpart` again: `select disk N` → `select partition 1` → `remove letter=Z` → `exit`. Eject the disk safely.
+>
+> Not sure you have the right disk or partition? Use Option B instead. It doesn't touch partitions.
 
 **Option B – on the Pi itself, over SSH (no need to remove the disk)**
 
@@ -149,6 +168,8 @@ The boot partition is not visible inside SSH apps, not even with protection mode
 > On a Pi 5, `/dev/ttyAMA10` is the small 3-pin debug connector next to the HDMI ports, **not** GPIO 14/15.
 >
 > `dtoverlay=disable-bt` turns off the on-board Bluetooth on Pi 3/4. Use a USB-RS485 adapter instead if you need Bluetooth.
+>
+> **Pi 5 with an M.2 HAT+ (NVMe SSD):** the HAT sits on top of the GPIO header. It is connected only through its PCIe ribbon cable, not through the GPIO pins. To reach pins 14/15 for the RS-232 board or a generator HAT, either mount the M.2 HAT+ underneath the Pi, or use a stacking header that is long enough for the pins to come up through the HAT.
 
 ### 3. Serial-to-network converter (serial over TCP / Modbus TCP)
 
@@ -216,7 +237,7 @@ Enable the genmon **MQTT** add-on in genmon and point it at your MQTT broker (fo
 | Genmon logs | `/data/log/` | `genmon.log`, `genserv.log`, `genloader.log` are also shown on the app **Log** tab. |
 
 - Both locations are included in Home Assistant backups (full backups, or partial backups that include the Genmon app).
-- Genmon's own **Backup** and **Restore** in the web interface also work.
+- Genmon's own **Export Configuration** and **Import Configuration** (**About** page) also work.
 - Uninstalling the app deletes these files. Make a backup first if you want to keep your settings.
 
 ### Settings the app always sets
@@ -236,7 +257,7 @@ Enable the genmon **MQTT** add-on in genmon and point it at your MQTT broker (fo
 | **Shutdown** | Stops the app, not the Home Assistant machine. |
 | **Restart** | Restarts genmon inside the app. |
 
-Not supported inside the app: Bluetooth tank sensors (Mopeka), GPIO-based genmon add-ons (gengpio, gengpioin, gengpioledblink, gencustomgpio), the LTE modem add-on, and Zeroconf discovery for genhalink.
+Not supported inside the app: Bluetooth tank sensors (Mopeka), GPIO-based genmon add-ons (gengpio, gengpioin, gengpioledblink, gencustomgpio), add-ons that use the Pi's SPI or I²C bus (**External Current Transformer (CT) Sensors** for the PintSize.me CT HAT, **DIY Fuel Tank Gauge Sensor**), the LTE modem add-on, and Zeroconf discovery for genhalink. The app can open serial and USB devices, but not `/dev/spidev*` or `/dev/i2c-*`. Enabling SPI in `config.txt` is not enough on its own.
 
 ## Updating
 
@@ -254,6 +275,8 @@ Start with the app **Log** tab – it shows the configured connection, available
 | Log: `Serial port '/dev/serial0' does not exist` | No real port configured yet. Set the port as described in [Connecting to the generator](#connecting-to-the-generator). |
 | Log: `Available serial devices: /dev/ttyAMA10` only (Pi 5) | GPIO UART not enabled. Add `dtparam=uart0=on` to `config.txt`, see [Raspberry Pi GPIO serial port](#2-raspberry-pi-gpio-serial-port-pins-1415). |
 | Genmon runs but shows communication errors | Wrong port, wiring (A/B or TX/RX swapped), or the controller is off. See the [genmon serial troubleshooting guide](https://github.com/jgyates/genmon/wiki/3.6---Serial-Troubleshooting). |
+| **Outage** / **Service Journal** pages empty after **Import Configuration** | Update the app to 0.1.11 or later. The imported history then shows up without importing again. See [Moving from an existing genmon install](#moving-from-an-existing-genmon-install). |
+| `gencthat.log`: `Error on opening SPI device` | SPI add-ons (CT sensor HAT) are not supported in the app, see [Differences](#differences-from-a-normal-genmon-install). Disable the add-on. |
 | `genloader.log` shows `PID still exists but it's a zombie` | Harmless message from genmon's loader when a module exits; it also appears on normal installs. |
 | Direct port 8000 doesn't load | Check the port is not disabled under **Network** on the **Configuration** tab, and that genmon is running. |
 | Integration cannot connect | Enable genhalink in genmon, keep port 9083 enabled, use the Home Assistant machine's IP address. |
@@ -273,6 +296,12 @@ Yes. This app is optional. The Home Assistant integrations work the same with ei
 
 **Will the app change anything on my Home Assistant host?**
 No. The only host change you may make yourself is enabling the Raspberry Pi GPIO serial port in `config.txt`.
+
+**The genmon wiki says to run `sudo raspi-config` or `sudo reboot`, but the command is not found.**
+Home Assistant OS has no `raspi-config`, and the SSH apps run in their own container, so Raspberry Pi OS commands such as `raspi-config`, `apt` or `sudo reboot` don't work there or don't affect the host. Raspberry Pi hardware options are set in `config.txt` on the boot partition instead (see [Raspberry Pi GPIO serial port](#2-raspberry-pi-gpio-serial-port-pins-1415)). In the SSH app, reboot the host with `ha host reboot`.
+
+**Is this a separate version of genmon? Who maintains it?**
+No, there is only one genmon. The app contains only the Home Assistant packaging (container setup, sidebar panel, startup page). When the image is built, it downloads genmon from the official [jgyates/genmon](https://github.com/jgyates/genmon) repository, so genmon features and fixes need no code changes in the app. A new genmon release is picked up the next time the image is built, which happens when Home Assistant installs an app update (see [Updating](#updating)). Report genmon problems on the [genmon discussions](https://github.com/jgyates/genmon/discussions) and app problems on the [app issues](https://github.com/jgyates/genmon-ha-addon/issues).
 
 **Where is genmon's `genmon.conf`?**
 In `/data/genmon/` inside the app. Edit settings through the genmon web interface; manual edits are not needed.
