@@ -26,13 +26,16 @@ RUN apt-get update \
 ADD ${GENMON_REPO}/info/refs?service=git-upload-pack /tmp/genmon-refs
 ARG BUILD_VERSION
 
-# No .git: the web UI "Update" then fails harmlessly instead of changing a copy lost on restart.
+# No .git: a git pull would change a copy that is lost on restart. The web UI "Update" rebuilds
+# the app instead (genmon-update); genmon-source and genmon-commit tell it whether genmon changed.
 # genmon-version (version, commit, date) is logged at startup.
 RUN echo "App ${BUILD_VERSION}: downloading genmon ${GENMON_REF}" \
     && git clone --depth 1 --branch "${GENMON_REF}" "${GENMON_REPO}" /genmon \
     && mkdir -p /usr/share/genmon-ha \
     && echo "$(sed -n -E 's/^[[:space:]]*GENMON_VERSION[[:space:]]*=[[:space:]]*"([^"]*)".*/\1/p' /genmon/genmonlib/program_defaults.py) ($(git -C /genmon log -1 --format='%h, %cs'))" \
         > /usr/share/genmon-ha/genmon-version \
+    && git -C /genmon rev-parse HEAD > /usr/share/genmon-ha/genmon-commit \
+    && printf '%s\n%s\n' "${GENMON_REPO}" "${GENMON_REF}" > /usr/share/genmon-ha/genmon-source \
     && rm -rf /genmon/.git /tmp/genmon-refs
 
 # Installed one by one so a Pi-only package that fails to build on amd64 doesn't break the image
@@ -43,7 +46,11 @@ RUN grep -vE '^[[:space:]]*(#|$)' /genmon/requirements.txt | while read -r req; 
 
 COPY rootfs /
 COPY run.sh /run.sh
+# genmonmaint.sh wrapper: "-u" (web UI Update) runs genmon-update, everything else the original
 RUN sed -i 's/\r$//' /run.sh /usr/local/sbin/* /usr/local/bin/genmon-* /etc/nginx/nginx.conf \
-    && chmod a+x /run.sh /usr/local/sbin/* /usr/local/bin/genmon-*
+        /usr/share/genmon-ha/genmonmaint.sh \
+    && mv /genmon/genmonmaint.sh /genmon/genmonmaint-orig.sh \
+    && cp /usr/share/genmon-ha/genmonmaint.sh /genmon/genmonmaint.sh \
+    && chmod a+x /run.sh /usr/local/sbin/* /usr/local/bin/genmon-* /genmon/genmonmaint.sh /genmon/genmonmaint-orig.sh
 
 CMD ["/run.sh"]

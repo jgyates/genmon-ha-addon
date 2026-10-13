@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.14
+
+- Genmon's **About → Update Software** button now works in the app. If a newer genmon is on GitHub, it rebuilds the app with it (like **⋮ → Rebuild**); if genmon is already up to date, it only restarts genmon. Settings and logs in `/data` are kept. The app log shows `Update:` lines with the result.
+
 ## 0.1.13
 
 - Every app update now downloads the latest genmon. Before, Docker could reuse a cached download, so an app update could keep an older genmon (genmon issue #1556).
