@@ -252,7 +252,7 @@ Enable the genmon **MQTT** add-on in genmon and point it at your MQTT broker (fo
 
 | Genmon web interface action | Behavior in this app |
 |---|---|
-| **Update** | Does nothing in the app: genmon is part of the app image. Update or rebuild the app instead (see [Updating](#updating)). |
+| **Update** | Rebuilds the app with the latest genmon (0.1.14 or later), the same as **⋮ → Rebuild** on the app page. Genmon is unavailable for a few minutes; reload the page when the app is running again. See [Updating](#updating). |
 | **Reboot** | Restarts the app, not the Home Assistant machine. |
 | **Shutdown** | Stops the app, not the Home Assistant machine. |
 | **Restart** | Restarts genmon inside the app. |
@@ -261,10 +261,11 @@ Not supported inside the app: Bluetooth tank sensors (Mopeka), GPIO-based genmon
 
 ## Updating
 
-Genmon is downloaded when Home Assistant builds the app image. Genmon's own **About → Update** button does nothing here. Your settings and history in `/data` (`genmon.conf`, outage log, service journal, kW/fuel logs) are kept by both options below. Don't uninstall and reinstall the app to update: uninstalling deletes `/data`.
+Genmon is downloaded when Home Assistant builds the app image. Your settings and history in `/data` (`genmon.conf`, outage log, service journal, kW/fuel logs) are kept by all options below. Don't uninstall and reinstall the app to update: uninstalling deletes `/data`.
 
+- **Genmon's Update button (0.1.14 or later):** **About → Update Software** in the genmon web interface checks GitHub for a newer genmon. If there is one, it asks Home Assistant to rebuild the app, which downloads it. If genmon is already up to date, it only restarts genmon. A build on a Raspberry Pi takes a few minutes; genmon (and the sidebar panel) is unavailable during that time, so reload the page once the app is running again. The app **Log** tab shows what the update did (lines starting with `Update:`). If an app update is waiting, Home Assistant refuses the rebuild: install the app update instead.
 - **App update:** when a new app version is available, Home Assistant shows an update on the app page. The image is rebuilt with the latest genmon.
-- **Get a genmon fix right away (0.1.13 or later):** open the app page, click **⋮** (top right) → **Rebuild**. This downloads the latest genmon if it changed since the last build, then restarts the app. A build on a Raspberry Pi takes a few minutes.
+- **Rebuild from the app page (0.1.13 or later):** open the app page, click **⋮** (top right) → **Rebuild**. This downloads the latest genmon if it changed since the last build, then restarts the app.
 - **Check which genmon you run:** the app **Log** tab shows a line like `genmon 2.0.2 (6d68252, 2026-10-08)` at startup. This is the genmon commit, which changes even when the version number doesn't.
 - **Choosing the genmon version:** the genmon source and branch/tag are set by the `GENMON_REPO` and `GENMON_REF` defaults in the [`Dockerfile`](genmon-ha-addon/Dockerfile). After changing them, bump `version` in [`config.yaml`](genmon-ha-addon/config.yaml) so Home Assistant offers the rebuild.
 
@@ -280,7 +281,7 @@ Start with the app **Log** tab – it shows the configured connection, available
 | Log: `Available serial devices: /dev/ttyAMA10` only (Pi 5) | GPIO UART not enabled. Add `dtparam=uart0=on` to `config.txt`, see [Raspberry Pi GPIO serial port](#2-raspberry-pi-gpio-serial-port-pins-1415). |
 | Genmon runs but shows communication errors | Wrong port, wiring (A/B or TX/RX swapped), or the controller is off. See the [genmon serial troubleshooting guide](https://github.com/jgyates/genmon/wiki/3.6---Serial-Troubleshooting). |
 | **Outage** / **Service Journal** pages empty after **Import Configuration** | Update the app to 0.1.11 or later. The imported history then shows up without importing again. See [Moving from an existing genmon install](#moving-from-an-existing-genmon-install). |
-| A genmon fix or new setting announced on GitHub is missing | Genmon's **About → Update** does nothing in the app. Use **⋮ → Rebuild** on the app page (0.1.13 or later), or install the app update. Compare the genmon commit on the **Log** tab with [genmon's commits](https://github.com/jgyates/genmon/commits/master). See [Updating](#updating). |
+| A genmon fix or new setting announced on GitHub is missing | Use genmon's **About → Update Software** (0.1.14 or later) or **⋮ → Rebuild** on the app page (0.1.13 or later), or install the app update. Before 0.1.14, genmon's Update button only restarted genmon. Compare the genmon commit on the **Log** tab with [genmon's commits](https://github.com/jgyates/genmon/commits/master). See [Updating](#updating). |
 | `gencthat.log`: `Error on opening SPI device` | SPI add-ons (CT sensor HAT) are not supported in the app, see [Differences](#differences-from-a-normal-genmon-install). Disable the add-on. |
 | `genloader.log` shows `PID still exists but it's a zombie` | Harmless message from genmon's loader when a module exits; it also appears on normal installs. |
 | Direct port 8000 doesn't load | Check the port is not disabled under **Network** on the **Configuration** tab, and that genmon is running. |
@@ -306,7 +307,7 @@ No. The only host change you may make yourself is enabling the Raspberry Pi GPIO
 Home Assistant OS has no `raspi-config`, and the SSH apps run in their own container, so Raspberry Pi OS commands such as `raspi-config`, `apt` or `sudo reboot` don't work there or don't affect the host. Raspberry Pi hardware options are set in `config.txt` on the boot partition instead (see [Raspberry Pi GPIO serial port](#2-raspberry-pi-gpio-serial-port-pins-1415)). In the SSH app, reboot the host with `ha host reboot`.
 
 **Is this a separate version of genmon? Who maintains it?**
-No, there is only one genmon. The app contains only the Home Assistant packaging (container setup, sidebar panel, startup page). When the image is built, it downloads genmon from the official [jgyates/genmon](https://github.com/jgyates/genmon) repository, so genmon features and fixes need no code changes in the app. A new genmon release is picked up the next time the image is built: when Home Assistant installs an app update, or when you click **Rebuild** on the app page (see [Updating](#updating)). Report genmon problems on the [genmon discussions](https://github.com/jgyates/genmon/discussions) and app problems on the [app issues](https://github.com/jgyates/genmon-ha-addon/issues).
+No, there is only one genmon. The app contains only the Home Assistant packaging (container setup, sidebar panel, startup page). When the image is built, it downloads genmon from the official [jgyates/genmon](https://github.com/jgyates/genmon) repository, so genmon features and fixes need no code changes in the app. A new genmon release is picked up the next time the image is built: when Home Assistant installs an app update, when you click **Rebuild** on the app page, or when you click **Update Software** in genmon (see [Updating](#updating)). Report genmon problems on the [genmon discussions](https://github.com/jgyates/genmon/discussions) and app problems on the [app issues](https://github.com/jgyates/genmon-ha-addon/issues).
 
 **Where is genmon's `genmon.conf`?**
 In `/data/genmon/` inside the app. Edit settings through the genmon web interface; manual edits are not needed.

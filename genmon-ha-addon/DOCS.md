@@ -44,7 +44,7 @@ Details: [README – Moving from an existing genmon install](https://github.com/
 
 | Web UI action | Behavior in this app |
 |---|---|
-| Update | Does nothing here. To get the latest genmon, update the app, or use **⋮ → Rebuild** on the app page. Settings and logs in `/data` are kept; don't uninstall to update. The Log tab shows the genmon version and commit at startup. |
+| Update | If a newer genmon is on GitHub, rebuilds the app with it (same as **⋮ → Rebuild** on the app page); otherwise only restarts genmon. Genmon is unavailable for a few minutes during the rebuild; reload the page afterwards. If an app update is waiting, install that instead. Settings and logs in `/data` are kept; don't uninstall to update. The Log tab shows the genmon version and commit at startup, and `Update:` lines for what the button did. |
 | Reboot | Restarts the app, not the host. |
 | Shutdown | Stops the app, not the host. |
 | Restart | Restarts genmon inside the app. |

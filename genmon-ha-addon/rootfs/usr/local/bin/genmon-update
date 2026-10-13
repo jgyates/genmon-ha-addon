@@ -1,0 +1,47 @@
+#!/usr/bin/with-contenv bashio
+# shellcheck shell=bash
+# genmon's About -> Update in the app (called by the genmonmaint.sh wrapper for "-u").
+# genmon is part of the app image, so instead of a git pull this asks Supervisor to rebuild the app,
+# which downloads the latest genmon. Supervisor removes the old image before building, so rebuild only
+# when GitHub is reachable and a newer genmon commit exists.
+
+SOURCE_FILE=/usr/share/genmon-ha/genmon-source
+COMMIT_FILE=/usr/share/genmon-ha/genmon-commit
+
+# genserv only logs this script's output after it ends, and a rebuild stops the app first,
+# so write straight to the app log
+if [ -w /proc/1/fd/1 ]; then
+    exec >/proc/1/fd/1 2>&1
+fi
+
+if [ ! -f "${SOURCE_FILE}" ] || [ ! -f "${COMMIT_FILE}" ]; then
+    bashio::log.error "Update: genmon build information is missing. Use Rebuild on the app page instead."
+    exit 1
+fi
+{ read -r repo; read -r ref; } < "${SOURCE_FILE}"
+installed="$(cat "${COMMIT_FILE}")"
+
+if ! refs="$(git ls-remote "${repo}" "${ref}" "${ref}^{}" 2>&1)"; then
+    bashio::log.error "Update: cannot reach ${repo} - not rebuilding. ${refs}"
+    exit 1
+fi
+# Annotated tags list the tag object and the commit ("^{}"); the commit is what was cloned
+latest="$(printf '%s\n' "${refs}" | awk -v r="${ref}" '$2 == "refs/tags/" r "^{}" { print $1; exit }')"
+if [ -z "${latest}" ]; then
+    latest="$(printf '%s\n' "${refs}" | awk -v r="${ref}" '$2 == "refs/heads/" r || $2 == "refs/tags/" r { print $1; exit }')"
+fi
+if [ -z "${latest}" ]; then
+    bashio::log.error "Update: ${ref} not found in ${repo} - not rebuilding."
+    exit 1
+fi
+
+if [ "${latest}" = "${installed}" ]; then
+    bashio::log.info "Update: genmon is up to date (${ref} ${installed:0:7}). Nothing to do."
+    exit 0
+fi
+
+bashio::log.warning "Update: newer genmon available (${ref} ${installed:0:7} -> ${latest:0:7}). Rebuilding the app; genmon is unavailable for a few minutes. Settings and logs are kept."
+if ! bashio::api.supervisor POST /addons/self/rebuild; then
+    bashio::log.error "Update: Supervisor did not rebuild the app. If the app page shows an app update, install it (it includes the latest genmon); otherwise use Rebuild on the app page."
+    exit 1
+fi
